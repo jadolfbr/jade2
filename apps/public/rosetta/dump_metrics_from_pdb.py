@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 #Author Jared Adolf-Bryfogle
+#Seems to be broken.
 
 from argparse import ArgumentParser
 from jade2.pymol_jade.PyMolScriptWriter import *

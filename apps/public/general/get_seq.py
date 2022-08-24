@@ -11,7 +11,7 @@ from jade2.basic.structure import util
 from jade2.basic import general
 from jade2.basic.structure.Structure import AntibodyStructure
 from jade2.basic.structure.BioPose import BioPose
-
+from Bio.PDB.Polypeptide import one_to_three
 
 gfp = """
 SKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTL
@@ -95,6 +95,11 @@ def get_parser():
                         default = False,
                         action = "store_true",
                         help = "Skip outputting the chain in the fasta.  Useful for designs.")
+
+    parser.add_argument("--three_letter",
+                        default = False,
+                        action = "store_true",
+                        help = "Write 3 letter codes instead of one.")
     return parser
 
 if __name__ == "__main__":
@@ -249,6 +254,12 @@ if __name__ == "__main__":
         elif options.pad_c_term:
             seq = seq+options.pad_c_term
 
+        if options.three_letter:
+            new_seq = []
+            for aa in seq:
+                new_seq.append(one_to_three(aa))
+            seq = " ".join(new_seq)
+
         if options.format == "basic":
             if options.output_original_seq:
                 outlines.append(options.prefix+name_chain+" : "+original_seq)
@@ -281,7 +292,7 @@ if __name__ == "__main__":
     else:
         for line in outlines:
             print(line)
-            print("\n")
+            #print("\n")
 
     #Print any duplicates
     all_sequences = defaultdict(list)

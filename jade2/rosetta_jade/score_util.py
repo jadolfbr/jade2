@@ -62,6 +62,7 @@ def get_dataframe_from_json(filename: str) -> pandas.DataFrame:
 def create_decoy_path_column(df: pandas.DataFrame, filename: str) -> pandas.DataFrame:
     def fix_path(original):
         v = get_decoy_path(os.path.dirname(os.path.abspath(filename)) + "/" + original)
+        print(v)
         return v
 
     def maybe_fix_path(original):
@@ -89,7 +90,7 @@ def create_decoy_path_column(df: pandas.DataFrame, filename: str) -> pandas.Data
     elif "decoy" in df.columns:
         if os.path.dirname(filename):
 
-            df["decoy_path"] = [fix_path(p) for p in df['decoy']]
+            df["decoy_path"] = [maybe_fix_path(p) for p in df['decoy']]
             print(df["decoy_path"])
             df['decoy_path']= df['decoy_path'].astype(str)
         else:
