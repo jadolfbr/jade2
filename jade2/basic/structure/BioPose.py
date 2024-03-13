@@ -72,9 +72,13 @@ class BioPose(object):
         :rtype: tuple(bio.PDB.Structure.Structure, dict)
         """
         structure = None
+
+        header = ""
         if re.search(".pdb", str(path)):
             parser = PDBParser()
+            header = parser.get_header()
         else:
+            #No header function for MMCIF parser
             parser = MMCIFParser()
 
         path = str(path).strip()
@@ -87,7 +91,7 @@ class BioPose(object):
         else :
             structure = parser.get_structure(model_id, path)
 
-        header = parser.get_header()
+
 
         return (structure, header)
 

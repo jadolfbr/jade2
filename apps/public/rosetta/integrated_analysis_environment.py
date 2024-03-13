@@ -498,6 +498,7 @@ class DashPlot:
         dirs = get_directories(outdir)
         starting_dir = 0
         for d in dirs:
+            if 'group' not in d: continue
             dSP = os.path.basename(d).split("_")
             #print(d)
             print(repr(dSP))

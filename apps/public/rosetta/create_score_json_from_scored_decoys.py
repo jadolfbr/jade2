@@ -3,7 +3,10 @@
 
 import os,json,re,glob,sys
 from argparse import ArgumentParser
-from jade2.rosetta_jade.score_util import parse_decoy_scores
+#from jade2.rosetta_jade.score_util import parse_decoy_scores
+from collections import defaultdict
+import gzip
+
 
 def get_pdbs(argu):
     if os.path.isdir(argu):
@@ -16,6 +19,74 @@ def get_pdbs(argu):
     else:
         return [argu]
 
+
+def open_file(file_path, mode='r'):
+    """
+    Open a file which can be gzipped.
+
+    :param file_path:
+    :param mode:
+    :return:
+    """
+    if file_path.split(".")[-1] == "gz":
+        # print "opening gzipped file"
+        INFILE = gzip.open(file_path, mode + 'b')
+    else:
+        INFILE = open(file_path, mode)
+
+    return INFILE
+
+def get_decoy_name(decoy):
+    """
+    Get the decoy name from path or name, whether .pdb, .pdb.gz or no extension.
+    :param decoy:
+    :rtype:str
+    """
+
+    name = os.path.basename(decoy)
+
+    if re.search(".pdb.gz", name) or re.search(".cif.gz", name):
+        return '.'.join(name.split(".")[0:-2])
+    elif re.search(".pdb", name) or re.search(".cif", name):
+        return '.'.join(name.split('.')[0:-1])
+    else:
+        return name
+
+def parse_decoy_scores(decoy_path):
+    """
+    Parse a score from a decoy and return a dictionary.
+    :param decoy_path:
+    :return: defaultdict
+    """
+
+    data = defaultdict()
+    labels = []
+    scores=[]
+    INFILE = open_file(decoy_path)
+    for line in INFILE:
+        if line.startswith("#BEGIN_POSE_ENERGIES_TABLE"):
+            lineSP = line.split()
+            #if len(lineSP) == 1:
+            data['decoy'] = get_decoy_name( os.path.basename(decoy_path) )
+            #else:
+            #    data['decoy'] = get_decoy_name( lineSP[-1] )
+
+        elif line.startswith("label"):
+            labels = line.split()[1:]
+            labels = ["total_score" if x=="total" else x for x in labels ]
+
+        elif line.startswith("pose"):
+            scores = [ float(x) for x in line.split()[1:] ]
+
+        else:
+            continue
+
+    INFILE.close()
+
+    for i in range(0, len(labels)):
+        data[labels[i]] = scores[i]
+
+    return data
 
 def get_parser():
     parser = ArgumentParser(description="This script creates a Rosetta score file from a set of structures - by parsing the score from them. Pass a directory, a PDBLIST, and/or a list of filenames")
