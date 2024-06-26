@@ -611,7 +611,7 @@ class DashPlot:
             scripter.add_line("os.system(\'"+s+"\' )")
             scripter.save_script()
 
-            os.system('pymol '+outdir+'/pml_script.pml &')
+            os.system(f'pymol {os.getcwd()}/{outdir}/pml_script.pml &')
             os.system('cat '+model_log)
 
 def create_figure_tab(col_options: List[Dict[Any,str]], label: str, pt: str) -> dbc.Tab:
@@ -802,6 +802,8 @@ if __name__ == "__main__":
 
 
     hover_name="decoy_path"
+    if options.hover_name:
+        hover_name = options.hover_name
     if options.scorefile == "test":
         df = px.data.tips()
         hover_name= "day"
