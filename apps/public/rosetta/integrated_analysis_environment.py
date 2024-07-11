@@ -581,12 +581,20 @@ class DashPlot:
                     os.system('cp ' + pdb_path + ' ' + outdir)
         LOG.close()
 
+        #NOTE: 7/2024 JAB: With new pymol 3 it seems to call cd for some reason to the grouped directory.
+        #So we will explicitly CD back out to the directory we should have been in the first place.
         if len(pdbs) <= self.box_selection_pymol_cutoff:
             #These could also have the same name from different groups.
             #So do 1->N
             scripter = PyMolScriptWriter(outdir)
+            scripter.add_line(f'cd {os.getcwd()}') #Fix for PyMol3 wonkiness
+
             first = True
             first_name = new_names[pdbs[0]]
+
+            if native and os.path.exists(native):
+                scripter.add_load_pdb(native, "native")
+                
             for i, pdb_path in enumerate(pdbs):
                 new_name = jp.get_decoy_name(new_names[pdb_path])
                 scripter.add_load_pdb(pdb_path, new_name)
@@ -595,8 +603,7 @@ class DashPlot:
                     scripter.add_line("center "+new_name)
                 first = False
 
-            if native and os.path.exists(native):
-                scripter.add_load_pdb("native", native)
+
 
             #scripter.add_show("sticks")
             #scripter.add_hide("(hydro)")
@@ -611,6 +618,8 @@ class DashPlot:
             scripter.add_line("os.system(\'"+s+"\' )")
             scripter.save_script()
 
+            print(f'cwd {os.getcwd()}')
+            print("Running"+f'pymol {os.getcwd()}/{outdir}/pml_script.pml &')
             os.system(f'pymol {os.getcwd()}/{outdir}/pml_script.pml &')
             os.system('cat '+model_log)
 
