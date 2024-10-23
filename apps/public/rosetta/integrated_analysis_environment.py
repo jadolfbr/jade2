@@ -594,7 +594,7 @@ class DashPlot:
 
             if native and os.path.exists(native):
                 scripter.add_load_pdb(native, "native")
-                
+
             for i, pdb_path in enumerate(pdbs):
                 new_name = jp.get_decoy_name(new_names[pdb_path])
                 scripter.add_load_pdb(pdb_path, new_name)

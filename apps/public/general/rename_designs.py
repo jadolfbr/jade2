@@ -46,7 +46,7 @@ if __name__ == "__main__":
             if line.startswith("#"): continue
             line = line.strip()
             new_name = options.prefix+line
-            os.system('mv '+line+' '+new_name)
+            os.system('cp '+line+' '+new_name)
     elif options.output_numbered_name:
         if not options.pdblist: sys.exit("Must give PDB list for output as numbered name!")
         OUT = open('new_names.txt', 'w')
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
             print("Renaming "+old_name+" to "+new_name+path.get_decoy_extension(old_name))
 
-            os.system("mv "+old_name+" "+new_name+path.get_decoy_extension(old_name))
+            os.system("cp "+old_name+" "+new_name+path.get_decoy_extension(old_name))
 
         INFILE.close()
 
