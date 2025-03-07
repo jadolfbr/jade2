@@ -11,7 +11,6 @@ from jade2.basic.structure import util
 from jade2.basic import general
 from jade2.basic.structure.Structure import AntibodyStructure
 from jade2.basic.structure.BioPose import BioPose
-from Bio.PDB.Polypeptide import one_to_three
 
 gfp = """
 SKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTL
@@ -25,9 +24,60 @@ igg_types = ["IgG_order", "IgG_order_lambda", "IgG_order_kappa", "IgG_order_heav
 format_types = ["basic", "fasta", "general_order"]
 format_types.extend(igg_types)
 
+
+#Biopython removed that function. So screw biopython.
+def three_to_one(three_letter_code):
+    amino_acid_dict = {
+        'Ala': 'A',
+        'Arg': 'R',
+        'Asn': 'N',
+        'Asp': 'D',
+        'Cys': 'C',
+        'Gln': 'Q',
+        'Glu': 'E',
+        'Gly': 'G',
+        'His': 'H',
+        'Ile': 'I',
+        'Leu': 'L',
+        'Lys': 'K',
+        'Met': 'M',
+        'Phe': 'F',
+        'Pro': 'P',
+        'Ser': 'S',
+        'Thr': 'T',
+        'Trp': 'W',
+        'Tyr': 'Y',
+        'Val': 'V'
+    }
+    return amino_acid_dict.get(three_letter_code, None)
+
+def one_to_three(one_letter_code):
+    amino_acid_dict = {
+        'A': 'Ala',
+        'R': 'Arg',
+        'N': 'Asn',
+        'D': 'Asp',
+        'C': 'Cys',
+        'Q': 'Gln',
+        'E': 'Glu',
+        'G': 'Gly',
+        'H': 'His',
+        'I': 'Ile',
+        'L': 'Leu',
+        'K': 'Lys',
+        'M': 'Met',
+        'F': 'Phe',
+        'P': 'Pro',
+        'S': 'Ser',
+        'T': 'Thr',
+        'W': 'Trp',
+        'Y': 'Tyr',
+        'V': 'Val'
+    }
+    return amino_acid_dict.get(one_letter_code, None)
+
+
 def get_parser():
-
-
 
     parser = argparse.ArgumentParser(description="Uses Biopython to print sequence information.  Example:\n"
                                                  "get_seq.py --pdb 2j88_A.pdb --format fasta --outpath test.txt")
