@@ -558,6 +558,7 @@ class DashPlot:
             LOG = open(model_log, 'a')
 
         new_names = {}
+        new_names_L = []
         if not self.skip_box_copy:
             print("Copying box/lasso selection into new directory")
         for i, pdb_path in enumerate(pdbs):
@@ -567,6 +568,8 @@ class DashPlot:
                 pdb_path_new=jp.get_decoy_name(pdb_path)+"_"+pdb_parent+jp.get_decoy_extension(pdb_path)
 
             new_names[pdb_path] = pdb_path_new
+            new_names_L.append(pdb_path_new)
+
             x_val = xs[i]
             y_val = ys[i]
             z_val = zs[i]
@@ -595,8 +598,11 @@ class DashPlot:
             if native and os.path.exists(native):
                 scripter.add_load_pdb(native, "native")
 
+            new_names_L = []
             for i, pdb_path in enumerate(pdbs):
                 new_name = jp.get_decoy_name(new_names[pdb_path])
+                print(new_name)
+                new_names_L.append(new_name)
                 scripter.add_load_pdb(pdb_path, new_name)
                 if not first:
                     scripter.add_align_to(new_name, first_name)
@@ -616,6 +622,23 @@ class DashPlot:
 
             s = 'tail -n 1 ' +outlog
             scripter.add_line("os.system(\'"+s+"\' )")
+
+            #3/19/25 Pymol (new) seems to load everything as states.  So we split them for now and delete the rest.
+            for p in new_names_L:
+                scripter.add_line(f'split_states {p}\n')
+                scripter.add_line(f'delete {p}\n')
+                scripter.add_line(f'delete {p}_0002\n')
+
+            #Re-align
+            first = True
+            first_name = new_names[pdbs[0]]+'_0001'
+            for i, pdb_path in enumerate(pdbs):
+                new_name = jp.get_decoy_name(new_names[pdb_path])+'_0001'
+                if not first:
+                    scripter.add_align_to(new_name, first_name)
+                    scripter.add_line("center "+new_name)
+                first = False
+
             scripter.save_script()
 
             print(f'cwd {os.getcwd()}')
