@@ -438,7 +438,7 @@ class DashPlot:
 
         if not os.path.exists(outlog):
             LOG = open(outlog, 'w')
-            LOG.write("#pdb,x,x_val,y,y_val,z,z_val\n")
+            LOG.write("pdb,x,x_val,y,y_val,z,z_val\n")
         else:
             LOG = open(outlog, 'a')
 
@@ -549,11 +549,11 @@ class DashPlot:
         LOG.close()
 
         print("Copying ",len(pdbs),"to",outdir)
-        model_log = outdir+'/log.txt'
+        model_log = outdir+'/log.csv'
 
         if not os.path.exists(model_log):
             LOG = open(model_log, 'w')
-            LOG.write("#pdb,x,x_val,y,y_val,z,z_val\n")
+            LOG.write("pdb,x,x_val,y,y_val,z,z_val\n")
         else:
             LOG = open(model_log, 'a')
 

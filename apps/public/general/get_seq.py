@@ -11,6 +11,7 @@ from jade2.basic.structure import util
 from jade2.basic import general
 from jade2.basic.structure.Structure import AntibodyStructure
 from jade2.basic.structure.BioPose import BioPose
+import pandas
 
 gfp = """
 SKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTL
@@ -21,8 +22,8 @@ HYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITHGMDELYK
 
 
 igg_types = ["IgG_order", "IgG_order_lambda", "IgG_order_kappa", "IgG_order_heavy"]
-format_types = ["basic", "fasta", "general_order"]
-format_types.extend(igg_types)
+format_types = ["basic", "fasta", "general_order", "csv"]
+#format_types.extend(igg_types)
 
 
 #Biopython removed that function. So screw biopython.
@@ -105,7 +106,8 @@ def get_parser():
                         choices = format_types)
 
     parser.add_argument("--outpath", "-o",
-                        help = "Output path.  If none is specified it will write to screen.")
+                        default="sequences.fasta",
+                        help = "Output path.  ")
 
     parser.add_argument("--prefix", "-t",
                         default = "",
@@ -198,6 +200,7 @@ if __name__ == "__main__":
             pdbs.append(pdb_path)
         INFILE.close()
 
+    csv_data = []
     for pdb in pdbs:
         #print "Reading "+pdb
         biopose = BioPose(pdb)
@@ -209,6 +212,9 @@ if __name__ == "__main__":
             sequences[path.get_decoy_name(pdb)+"_"+options.cdr] = seq
             ordered_ids.append(path.get_decoy_name(pdb)+"_"+options.cdr)
         else:
+            d = dict()
+            d['path'] = pdb
+            d['ID'] = path.get_decoy_name(pdb)
             for biochain in biostructure[0]:
                 if options.chain and biochain.id != options.chain:
                     continue
@@ -230,6 +236,11 @@ if __name__ == "__main__":
                     out_id = path.get_decoy_name(pdb)+"_"+biochain.id
                 sequences[out_id] = seq
                 ordered_ids.append(out_id)
+                d[biochain.id] = seq
+            csv_data.append(d)
+
+
+
 
     outlines = []
     i = 1
@@ -333,16 +344,22 @@ if __name__ == "__main__":
 
         i+=1
 
+    #Print always
+    for line in outlines:
+        print(line)
 
-    if options.outpath:
+
+    #Adding this, even though this whole file needs to be rewritten.  It is more than 10 yrs old at this point...
+    if options.format == 'csv':
+        df = pandas.DataFrame.from_dict(csv_data)
+        outp = "".join(options.outpath.split('.')[0:-1])
+        df.to_csv(f'{outp}.csv')
+
+    else:
         OUT = open(options.outpath, "w")
         for line in outlines:
-            OUT.write(line+"\n")
+            OUT.write(line + "\n")
         OUT.close()
-    else:
-        for line in outlines:
-            print(line)
-            #print("\n")
 
     #Print any duplicates
     all_sequences = defaultdict(list)
